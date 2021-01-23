@@ -2,6 +2,26 @@
 ini_set('date.timezone', 'Asia/Shanghai');
 
 /**
+ * HTTP请求
+ * @param $url
+ * @return string
+ */
+function request_api($url)
+{
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10); //建立连接超时
+    curl_setopt($curl, CURLOPT_TIMEOUT, 30); //最大持续连接时间
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+    $result = curl_exec($curl);
+    curl_close($curl);
+    return $result;
+}
+
+/**
  * 获取每日一句
  * @param $channel
  * @return string
@@ -34,7 +54,7 @@ function get_one_words($channel = null)
  */
 function get_weather()
 {
-    return file_get_contents('http://wttr.in/Shanghai?format=3');
+    return request_api('http://wttr.in/Shanghai?format=3');
 }
 
 // 相差天数
