@@ -1,0 +1,49 @@
+<?php
+ini_set('date.timezone', 'Asia/Shanghai');
+
+/**
+ * 获取每日一句
+ * @param $channel
+ * @return string
+ */
+function get_one_words($channel = null)
+{
+    $channel_list = [1, 2, 3, 4];
+    $channel = ($channel && $channel_list[$channel]) ? $channel : mt_rand(1, count($channel_list));
+    $one_words = '';
+    switch ($channel) {
+        case 1: // 彩虹屁
+            $one_words = file_get_contents('https://chp.shadiao.app/api.php');
+            break;
+        case 2: // 土味情话
+            $one_words = file_get_contents('https://api.lovelive.tools/api/SweetNothings');
+            break;
+        case 3: // 格言信息
+            $one_words = json_decode(file_get_contents('http://open.iciba.com/dsapi'), true)['note'];
+            break;
+        case 4: // 一言
+            $one_words = json_decode(file_get_contents('https://v1.hitokoto.cn/'), true)['hitokoto'];
+            break;
+    }
+    return $one_words;
+}
+
+/**
+ * 获取天气
+ * @return string
+ */
+function get_weather()
+{
+    return file_get_contents('http://wttr.in/Shanghai?format=3');
+}
+
+// 相差天数
+$diff = (strtotime(date('Y-m-d')) - strtotime('2015-07-07')) / 86400;
+// 标题
+$text = "[每日一句]爱你的第{$diff}天";
+// 天气
+$weather = get_weather();
+// 一句话
+$one_words = get_one_words();
+// 输出文件
+file_put_contents('result.html', join("\n<br/>\n", [$text, $weather, $one_words]));

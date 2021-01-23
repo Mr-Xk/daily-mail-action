@@ -12,8 +12,12 @@ jobs:
     steps:
       - name: 'Checkout codes'
         uses: actions/checkout@v1
+      - name: 'Setup PHP'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
       - name: 'Get Weather'
-        run: bash ./weather.sh
+        run: bash ./main.sh
       - name: 'Get Date'
         run: echo "REPORT_DATE=$(TZ=':Asia/Shanghai' date '+%Y-%m-%d %T')" >> $GITHUB_ENV
       - name: 'Send mail'
