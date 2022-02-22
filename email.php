@@ -66,4 +66,4 @@ $weather = get_weather();
 // 一句话
 $one_words = get_one_words();
 // 输出文件
-file_put_contents('result.html', join("\n<br/>\n", [$text, $weather, $one_words]));
+file_put_contents('result.html', join(PHP_EOL, [$text, $weather, $one_words]));
