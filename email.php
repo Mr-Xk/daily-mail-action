@@ -54,7 +54,7 @@ function get_one_words($channel = null)
  */
 function get_weather()
 {
-    return request_api('http://wttr.in/Shanghai?format=3');
+    return request_api('https://wttr.in/Shanghai?format=3');
 }
 
 // 相差天数
