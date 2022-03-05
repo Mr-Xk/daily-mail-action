@@ -2,34 +2,14 @@
 ini_set('date.timezone', 'Asia/Shanghai');
 
 /**
- * HTTP请求
- * @param $url
- * @return string
- */
-function request_api($url)
-{
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10); //建立连接超时
-    curl_setopt($curl, CURLOPT_TIMEOUT, 30); //最大持续连接时间
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-    $result = curl_exec($curl);
-    curl_close($curl);
-    return $result;
-}
-
-/**
  * 获取每日一句
- * @param $channel
+ * @param int $channel 渠道 1.彩虹屁,2.土味情话,3.格言信息,4.一言
  * @return string
  */
 function get_one_words($channel = null)
 {
     $channel_list = [1, 2, 3, 4];
-    $channel = ($channel && $channel_list[$channel]) ? $channel : mt_rand(1, count($channel_list));
+    $channel = in_array($channel, $channel_list) ? $channel : random_int(1, count($channel_list));
     $one_words = '';
     switch ($channel) {
         case 1: // 彩虹屁
@@ -50,11 +30,41 @@ function get_one_words($channel = null)
 
 /**
  * 获取天气
+ * 
+ * 教程：https://www.sojson.com/blog/305.html
+ * 
+ * 旧api：http://wttr.in/Shanghai?format=3
+ * 
  * @return string
  */
 function get_weather()
 {
-    return request_api('http://wttr.in/Shanghai?format=3');
+    // 101020100:上海
+    $data = json_decode(file_get_contents('http://t.weather.sojson.com/api/weather/city/101020100'), true);
+    if ($data['status'] != 200) {
+        return $data['message'];
+    }
+
+    // 这个天气的接口更新不及时，有时候当天1点的时候，还是昨天的天气信息，如果天气不一致，则取下一天(今天)的数据
+    $weather_data = $data['data']['forecast'][0];
+    $is_tomorrow = (int)date('H') >= 20;
+    if ($is_tomorrow || $weather_data['ymd'] != date('Y-m-d')) {
+        $weather_data = $data['data']['forecast'][1];
+    }
+
+    // 格式化数据
+    $format = "%s,%s %s\n【今日天气】%s\n【今日气温】%s %s\n【今日风速】%s\n【出行提醒】%s";
+    return sprintf(
+        $format,
+        $weather_data['ymd'],
+        $weather_data['week'],
+        $data['cityInfo']['city'],
+        $weather_data['type'],
+        $weather_data['low'],
+        $weather_data['high'],
+        $weather_data['fx'] . $weather_data['fl'],
+        $weather_data['notice']
+    );
 }
 
 // 相差天数
