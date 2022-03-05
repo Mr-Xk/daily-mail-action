@@ -92,10 +92,10 @@ function get_weather()
 // 相差天数
 $diff = (strtotime(date('Y-m-d')) - strtotime('2015-07-07')) / 86400;
 // 标题
-$text = "[每日一句]爱你的第{$diff}天";
+$text = "[每日提醒]爱你的第{$diff}天";
+// 一句话
+$one_words = get_one_words() . PHP_EOL;
 // 天气
 $weather = get_weather();
-// 一句话
-$one_words = get_one_words();
 // 输出文件
-file_put_contents('result.html', join(PHP_EOL, [$text, $one_words . PHP_EOL, $weather]));
+file_put_contents('result.html', join(PHP_EOL, [$text, $one_words, $weather]));
