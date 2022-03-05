@@ -42,7 +42,7 @@ function get_weather()
     // 101020100:上海
     $data = json_decode(file_get_contents('http://t.weather.sojson.com/api/weather/city/101020100'), true);
     if ($data['status'] != 200) {
-        return $data['message'];
+        return $data['message'] ?? 'API挂了';
     }
 
     // 这个天气的接口更新不及时，有时候当天1点的时候，还是昨天的天气信息，如果天气不一致，则取下一天(今天)的数据
@@ -53,16 +53,38 @@ function get_weather()
     }
 
     // 格式化数据
-    $format = "%s,%s %s\n【今日天气】%s\n【今日气温】%s %s\n【今日风速】%s\n【出行提醒】%s";
+    /**
+     *{
+     *  "date": "05",
+     *  "high": "高温 11℃",
+     *  "low": "低温 6℃",
+     *  "ymd": "2022-03-05",
+     *  "week": "星期六",
+     *  "sunrise": "06:17",
+     *  "sunset": "17:55",
+     *  "aqi": 59,
+     *  "fx": "东北风",
+     *  "fl": "3级",
+     *  "type": "晴",
+     *  "notice": "愿你拥有比阳光明媚的心情"
+     *}
+     *
+     *2022-03-05,星期六 上海市
+     *【今日天气】晴
+     *【今日气温】低温 6℃ 高温 11℃
+     *【今日风速】东北风3级
+     *【出行提醒】愿你拥有比阳光明媚的心情
+     */
+    $format = "%s,%s %s【今日天气】%s【今日气温】%s %s【今日风速】%s【出行提醒】%s";
     return sprintf(
         $format,
         $weather_data['ymd'],
         $weather_data['week'],
-        $data['cityInfo']['city'],
-        $weather_data['type'],
+        $data['cityInfo']['city'] . PHP_EOL,
+        $weather_data['type'] . PHP_EOL,
         $weather_data['low'],
-        $weather_data['high'],
-        $weather_data['fx'] . $weather_data['fl'],
+        $weather_data['high'] . PHP_EOL,
+        $weather_data['fx'] . $weather_data['fl'] . PHP_EOL,
         $weather_data['notice']
     );
 }
@@ -76,4 +98,4 @@ $weather = get_weather();
 // 一句话
 $one_words = get_one_words();
 // 输出文件
-file_put_contents('result.html', join("\n<br/>\n", [$text, $weather, $one_words]));
+file_put_contents('result.html', join(PHP_EOL, [$text, $one_words . PHP_EOL, $weather]));
