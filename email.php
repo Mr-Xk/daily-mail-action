@@ -3,29 +3,23 @@ ini_set('date.timezone', 'Asia/Shanghai');
 
 /**
  * 获取每日一句
- * @param int $channel 渠道 1.彩虹屁,2.土味情话,3.格言信息,4.一言
  * @return string
  */
-function get_one_words($channel = null)
+function get_one_words()
 {
-    $channel_list = [1, 2, 3, 4];
-    $channel = in_array($channel, $channel_list) ? $channel : random_int(1, count($channel_list));
-    $one_words = '';
+    $channel = random_int(1, 4);
     switch ($channel) {
         case 1: // 彩虹屁
-            $one_words = file_get_contents('https://chp.shadiao.app/api.php');
-            break;
+            return file_get_contents('https://chp.shadiao.app/api.php');
         case 2: // 土味情话
-            $one_words = file_get_contents('https://api.lovelive.tools/api/SweetNothings');
-            break;
+            return file_get_contents('https://api.lovelive.tools/api/SweetNothings');
         case 3: // 格言信息
-            $one_words = json_decode(file_get_contents('http://open.iciba.com/dsapi'), true)['note'];
-            break;
+            return json_decode(file_get_contents('http://open.iciba.com/dsapi'), true)['note'];
         case 4: // 一言
-            $one_words = json_decode(file_get_contents('https://v1.hitokoto.cn/'), true)['hitokoto'];
-            break;
+            return json_decode(file_get_contents('https://v1.hitokoto.cn/'), true)['hitokoto'];
+        default:
+            return 'API挂了';
     }
-    return $one_words;
 }
 
 /**
@@ -48,8 +42,10 @@ function get_weather()
     // 这个天气的接口更新不及时，有时候当天1点的时候，还是昨天的天气信息，如果天气不一致，则取下一天(今天)的数据
     $weather_data = $data['data']['forecast'][0];
     $is_tomorrow = (int)date('H') >= 20;
+    $date = '今日';
     if ($is_tomorrow || $weather_data['ymd'] != date('Y-m-d')) {
         $weather_data = $data['data']['forecast'][1];
+        $date = '明日';
     }
 
     // 格式化数据
@@ -75,7 +71,7 @@ function get_weather()
      *【今日风速】东北风3级
      *【出行提醒】愿你拥有比阳光明媚的心情
      */
-    $format = "%s,%s %s【今日天气】%s【今日气温】%s %s【今日风速】%s【出行提醒】%s";
+    $format = "%s,%s %s【{$date}天气】%s【{$date}气温】%s %s【{$date}风速】%s【出行提醒】%s";
     return sprintf(
         $format,
         $weather_data['ymd'],
